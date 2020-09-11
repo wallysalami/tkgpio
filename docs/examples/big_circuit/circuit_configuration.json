@@ -1,0 +1,114 @@
+{
+    "name": "My Big Project",
+    "width": 700,
+    "height": 550,
+    "leds": [
+        {"x": 400, "y": 50,  "name": "LED 1", "pin": 21},
+        {"x": 400, "y": 110, "name": "LED 2", "pin": 22},
+        {"x": 400, "y": 170, "name": "LED 3", "pin": 23},
+        {"x": 400, "y": 230, "name": "LED 4", "pin": 24},
+        {"x": 400, "y": 290, "name": "LED 5", "pin": 25}
+    ],
+    "buzzers": [
+        {"x": 50, "y": 170, "name": "Buzzer", "pin": 16, "frequency": 440}
+    ],
+    "buttons": [
+        {"x": 30, "y": 280, "name": "Button 1", "pin": 11},
+        {"x": 100, "y": 280, "name": "Button 2", "pin": 12},
+        {"x": 170, "y": 280, "name": "Button 3", "pin": 13},
+        {"x": 240, "y": 280, "name": "Button 4", "pin": 14}
+    ],
+    "lcds": [
+        {"x": 30, "y": 40, "name": "LCD", "pins":[2, 3, 4, 5, 6, 7], "columns": 16, "lines": 2}
+    ],
+    "distance_sensors": [
+        {"x": 30, "y": 430, "name": "Distance Sensor (cm)", "trigger_pin": 17, "echo_pin": 18, "min_distance": 0, "max_distance": 30}
+    ],
+    "light_sensors": [
+        {"x": 350, "y": 380, "name": "Light Sensor", "pin": 8}
+    ],
+    "motion_sensors": [
+        {"x": 150, "y": 170, "name": "Motion Sensor", "pin": 27, "detection_radius": 50, "delay_duration": 5, "block_duration": 3 }
+    ],
+    "infrared_receiver": {
+        "x": 500,
+        "y": 50, 
+        "name": "Remote Control",
+        "config": "default",
+        "remote_control": {
+            "width": 100,
+            "height": 300,
+            "color": "black",
+            "key_color": "white",
+            "key_width": 2,
+            "key_height": 1,
+            "key_rows":[
+                {
+                    "padding_top": 10,
+                    "buttons": [
+                        {"name": "1"},
+                        {"name": "2"},
+                        {"name": "3"}
+                    ]
+                },
+                {
+                    "padding_top": 20,
+                    "buttons": [
+                        {"name": "4"},
+                        {"name": "5"},
+                        {"name": "6"}
+                    ]
+                },
+                {
+                    "padding_top": 20,
+                    "buttons": [
+                        {"name": "7"},
+                        {"name": "8"},
+                        {"name": "9"}
+                    ]
+                },
+                {
+                    "padding_top": 20,
+                    "buttons": [
+                        {"name": "\u2731"},
+                        {"name": "0"},
+                        {"name": "#"}
+                    ]
+                },
+                {
+                    "padding_top": 20,
+                    "buttons": [
+                        null,
+                        {"name": "\u25B2", "code": "KEY_UP"},
+                        null
+                    ]
+                },
+                {
+                    "padding_top": 20,
+                    "buttons": [
+                        {"name": "\u25C0", "code": "KEY_LEFT"},
+                        {"name": "OK"},
+                        {"name": "\u25B6", "code": "KEY_RIGHT"}
+                    ]
+                },
+                {
+                    "padding_top": 20,
+                    "buttons": [
+                        null,
+                        {"name": "\u25BC", "code": "KEY_DOWN"},
+                        null
+                    ]
+                }
+            ]
+        }
+    },
+    "infrared_emitter": {
+        "x": 540,
+        "y": 430, 
+        "name": "Infrared Emitter",
+        "remote_controls": {
+            "mini": ["KEY_1", "KEY_2", "KEY_3", "KEY_4", "KEY_5", "KEY_6", "KEY_7", "KEY_8", "KEY_9", "KEY_0", "KEY_UP", "KEY_DOWN", "KEY_LEFT", "KEY_RIGHT", "KEY_OK"],
+            "TV": ["KEY_POWER", "KEY_MUTE", "KEY_FAVORITES", "KEY_EPG", "KEY_MENU", "KEY_EXIT", "KEY_1", "KEY_2", "KEY_3", "KEY_4", "KEY_5", "KEY_6", "KEY_7", "KEY_8", "KEY_9", "KEY_0", "KEY_CHANNELUP", "KEY_CHANNELDOWN", "KEY_VOLUMEUP", "KEY_VOLUMEDOWN", "KEY_OK", "KEY_AUDIO", "KEY_SUBTITLE", "KEY_INFO", "KEY_BACK", "KEY_REWIND", "KEY_FASTFORWARD", "KEY_PLAYPAUSE", "KEY_STOP", "KEY_CHANNELUP", "KEY_PREVIOUS", "KEY_NEXT", "KEY_RED", "KEY_GREEN", "KEY_YELLOW", "KEY_BLUE"]
+        }
+    }
+}
