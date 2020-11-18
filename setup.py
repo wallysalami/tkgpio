@@ -13,6 +13,13 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/wallysalami/tkgpio",
     packages=setuptools.find_packages(),
+    install_requires=[
+        "gpiozero",
+        "numpy",
+        "Pillow",
+        "scipy",
+        "sounddevice",
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
