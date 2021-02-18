@@ -2,6 +2,9 @@ from tkgpio import TkCircuit
 
 class Adafruit_CharLCD(object):
     """Class to represent and interact with an HD44780 character LCD display."""
+    
+    # I'm not using this variable, but it might be useful to someone who is looking for a list of special characters in LCDs
+    SPECIAL_CHARACTERS = "→←。「」、・ァィゥェォャュョッーアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン゛゜αäßεµσρq√יּϳˣ¢Ⱡñöpqθ∞ΩüΣπx̄y干九円÷ ▮̄"
 
     def __init__(self, rs, en, d4, d5, d6, d7, cols, lines, backlight=None,
                     invert_polarity=True,
@@ -55,8 +58,21 @@ class Adafruit_CharLCD(object):
         pass
 
     def message(self, text):
-        self._text += text
+        text_with_special_characters = ""
+        for character in text:
+            if character != "\n":
+                code = ord(character)
+                code = code % 255
+                character = chr(code)
+                
+                if code <= 31 or (code >= 128 and code <= 161):
+                    character = " "
+                    
+            text_with_special_characters += character
+        
+        self._text += text_with_special_characters
         fixed_text = self._text
+        
         
         # limit text to lcd's dimensions (lines and columns)
         lines = self._text.split("\n")

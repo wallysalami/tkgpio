@@ -2,7 +2,7 @@ from .base import TkDevice, SingletonMeta
 from .base import PreciseMockTriggerPin, PreciseMockFactory, PreciseMockChargingPin
 from gpiozero import Device
 from gpiozero.pins.mock import MockPWMPin
-from PIL import ImageEnhance
+from PIL import ImageEnhance, Image, ImageDraw, ImageFont, ImageTk
 from sounddevice import play, stop
 import numpy
 import scipy.signal
@@ -13,6 +13,7 @@ from pathlib import Path
 from platform import system
 from functools import partial
 from math import sqrt
+import os
       
       
 class TkCircuit(metaclass=SingletonMeta):
@@ -92,6 +93,9 @@ class TkCircuit(metaclass=SingletonMeta):
         
         
 class TkLCD(TkDevice):
+    _image = None
+    _photo_image = None
+    
     def __init__(self, root, x, y, name, pins, columns, lines):
         super().__init__(root, x, y, name)
         self._redraw()
@@ -99,21 +103,59 @@ class TkLCD(TkDevice):
         self._pins = pins
         self._columns = columns
         self._lines = lines
-        
-        if system() == "Darwin":
-            font=("Courier", 25)
-        else:
-            font=("Courier New", 20)
             
-        self._label = Label(root,
-            font=font, justify="left", anchor="nw",
-            width=columns, height=lines, padx=5, pady=5,
-            background="#82E007", borderwidth=2, relief="solid")
+        self._label = Label(root)
         self._label.place(x=x, y=y)
         
     def update_text(self, pins, text):
+        MARGIN = 8
+        FONT_SIZE = 17
+        CHAR_WIDTH = 12
+        CHAR_HEIGHT = 16
+        CHAR_X_GAP = 3
+        CHAR_Y_GAP = 5
+        
+        image_width = MARGIN * 2 + self._columns * (CHAR_WIDTH) + (self._columns - 1) * CHAR_X_GAP
+        image_height = MARGIN * 2 + self._lines * (CHAR_HEIGHT) + (self._lines - 1) * CHAR_Y_GAP
+        
         if pins == self._pins:
-            self._label.configure(text = text)
+            image = Image.new('RGB', (image_width, image_height), color="#82E007")
+ 
+            current_folder = os.path.dirname(__file__)
+            font_path = os.path.join(current_folder, "hd44780.ttf")
+            font = ImageFont.truetype(font_path, FONT_SIZE)
+            d = ImageDraw.Draw(image)
+            
+            x = MARGIN
+            for j in range(0, self._columns):
+                y = MARGIN
+                for i in range(0, self._lines):
+                    d.rectangle((x, y, x+CHAR_WIDTH, y+CHAR_HEIGHT), fill ="#72D000")
+                    y += (CHAR_Y_GAP + CHAR_HEIGHT)
+                    
+                x += (CHAR_X_GAP + CHAR_WIDTH)
+                    
+            x = MARGIN
+            y = MARGIN
+            line = 1
+            column = 1
+            for character in text:
+                if character == "\n":
+                    y += (CHAR_Y_GAP + CHAR_HEIGHT)
+                    x = MARGIN
+                    line += 1
+                    column = 1
+                else:
+                    if line <= self._lines and column <= self._columns:
+                        d.text((x,y), character, font=font, fill="black")
+                        
+                    x += (CHAR_X_GAP + CHAR_WIDTH)
+                    column += 1
+            
+            self._photo_image = ImageTk.PhotoImage(image)
+            
+            self._label.configure(image = self._photo_image)
+            self._redraw()
             self._root.update()
         
         
