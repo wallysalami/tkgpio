@@ -17,7 +17,7 @@ class Adafruit_CharLCD(object):
         self._lines = lines
         self._backlight = backlight
         self._displaymode = "left"
-        self._text = ""
+        self.clear()
 
     def home(self):
         pass
