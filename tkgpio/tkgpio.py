@@ -43,6 +43,7 @@ class TkCircuit(metaclass=SingletonMeta):
         self._root.resizable(False, False)
         self._root["background"] = "white"
         self._root.protocol("WM_DELETE_WINDOW", self._on_closing)
+        self._root.tk.call("tk", "scaling", 1.0)
         
         self._outputs = []
         self._outputs += [self.add_device(TkLED, parameters) for parameters in setup["leds"]]

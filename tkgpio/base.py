@@ -15,7 +15,7 @@ class TkDevice():
         self._widget = None
         self._image_states = {}
         
-        text_label = Label(root, text=name, background="white", anchor="w")
+        text_label = Label(root, text=name, background="white", anchor="w", font=("Arial", 13))
         text_label.place(x=x, y=y-20)
         
     def _redraw(self):
