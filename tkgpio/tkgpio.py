@@ -108,6 +108,8 @@ class TkLCD(TkDevice):
         self._label = Label(root)
         self._label.place(x=x, y=y)
         
+        self.update_text(self._pins, "")
+        
     def update_text(self, pins, text):
         MARGIN = 8
         FONT_SIZE = 17
