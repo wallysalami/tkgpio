@@ -28,6 +28,6 @@ setuptools.setup(
     python_requires='>=3.5',
     include_package_data=True,
     package_data={
-        "tkgpio": ["images/*"],
+        "tkgpio": ["resources/**/*"],
     }
 )

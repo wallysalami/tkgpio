@@ -10,7 +10,6 @@ from tkinter import Tk, Frame, Label, Button, Scale, HORIZONTAL, VERTICAL, CENTE
 from threading import Thread, Timer
 from sys import path, exit
 from pathlib import Path
-from platform import system
 from functools import partial
 from math import sqrt
 import os
@@ -125,7 +124,7 @@ class TkLCD(TkDevice):
             image = Image.new('RGB', (image_width, image_height), color="#82E007")
  
             current_folder = os.path.dirname(__file__)
-            font_path = os.path.join(current_folder, "hd44780.ttf")
+            font_path = os.path.join(current_folder, "resources/fonts/hd44780.ttf")
             font = ImageFont.truetype(font_path, FONT_SIZE)
             d = ImageDraw.Draw(image)
             

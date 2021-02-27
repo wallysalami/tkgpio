@@ -35,7 +35,7 @@ class TkDevice():
             image = TkDevice._images[image_file_name]
         else:
             current_folder = path.dirname(__file__)
-            file_path = path.join(current_folder, "images/" + image_file_name)
+            file_path = path.join(current_folder, "resources/images/" + image_file_name)
 
             image = Image.open(file_path)
             if dimensions != None:
