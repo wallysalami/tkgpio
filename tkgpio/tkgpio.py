@@ -1,7 +1,7 @@
-from .base import TkDevice, SingletonMeta
+from .base import TkDevice, SingletonMeta, MockSPI
 from .base import PreciseMockTriggerPin, PreciseMockFactory, PreciseMockChargingPin
 from gpiozero import Device
-from gpiozero.pins.mock import MockPWMPin
+from gpiozero.pins.mock import MockPWMPin, MockSPIDevice
 from PIL import ImageEnhance, Image, ImageDraw, ImageFont, ImageTk
 from sounddevice import play, stop
 import numpy
@@ -29,13 +29,14 @@ class TkCircuit(metaclass=SingletonMeta):
             "motion_sensors": [],
             "distance_sensors": [],
             "light_sensors": [],
+            "adc": None,
             "infrared_receiver": None,
             "infrared_emitter": None
         }
         
         default_setup.update(setup)
         setup = default_setup
-                
+        
         self._root = Tk()
         self._root.title(setup["name"])
         self._root.geometry("%dx%d" % (setup["width"], setup["height"]))
@@ -50,6 +51,12 @@ class TkCircuit(metaclass=SingletonMeta):
         
         self._lcds = [self.add_device(TkLCD, parameters) for parameters in setup["lcds"]]
         
+        if setup["adc"] != None:
+            spi = TkSPI(setup["adc"]["mcp_chip"])
+            for parameters in setup["adc"]["potenciometers"]:
+                parameters["tk_spi"] = spi
+                self.add_device(TkPotentiometer, parameters)
+                
         for parameters in setup["buttons"]:
             self.add_device(TkButton, parameters)
             
@@ -358,6 +365,29 @@ class TkLightSensor(TkDevice):
         
     def _scale_changed(self, value):
         self._pin.charge_time = float(value) / 10000
+        
+        
+class TkSPI(object):
+    def __init__(self, device_code):
+        self.mock_spi = MockSPI()
+        self.mock_spi.device_code = device_code
+        
+        
+class TkPotentiometer(TkDevice):
+    def __init__(self, root, x, y, name, tk_spi, channel):
+        super().__init__(root, x, y, name)
+        
+        self._tk_spi = tk_spi
+        self._channel = channel
+        
+        self._scale = Scale(root, from_=0, to=1, resolution=0.01, showvalue=0,
+            orient=HORIZONTAL, command=self._scale_changed, sliderlength=20, length=150, highlightthickness = 0, background="white")
+        self._scale.place(x=x, y=y)
+        self._scale.set(0.5)
+        self._scale_changed(self._scale.get())
+        
+    def _scale_changed(self, value):
+        self._tk_spi.mock_spi.set_value_for_channel(float(value), self._channel)
             
             
 class TkInfraredReceiver(TkDevice, metaclass=SingletonMeta):
