@@ -24,7 +24,8 @@ class TkCircuit(metaclass=SingletonMeta):
         default_setup = {
             "name": "Virtual GPIO",
             "width": 500, "height": 500,
-            "leds":[], "buzzers":[], "buttons":[],
+            "leds":[], "buzzers":[],
+            "buttons":[], "toggles": [],
             "lcds":[],
             "motors":[],
             "motion_sensors": [],
@@ -61,6 +62,9 @@ class TkCircuit(metaclass=SingletonMeta):
                 
         for parameters in setup["buttons"]:
             self.add_device(TkButton, parameters)
+            
+        for parameters in setup["toggles"]:
+            self.add_device(TkToggle, parameters)
             
         for parameters in setup["distance_sensors"]:
             self.add_device(TkDistanceSensor, parameters)
@@ -301,6 +305,37 @@ class TkButton(TkDevice):
         
     def _change_pin(self, is_press):
         if is_press:
+            self._pin.drive_low()
+        else:
+            self._pin.drive_high()
+            
+
+class TkToggle(TkDevice):
+    def __init__(self, root, x, y, name, pin, on_label="ON", off_label="OFF", is_on=False):
+        super().__init__(root, x, y, name)
+        
+        self._pin = Device.pin_factory.pin(pin)
+        
+        if off_label != "" and off_label != None:
+            left_label = Label(root, text=off_label, background="white", anchor="w", font=("Arial", 13))
+            left_label.place(x=x, y=y)
+            left_label.update()
+            switch_x = x + left_label.winfo_width()
+        else:
+            switch_x = x
+        
+        self._scale = Scale(root, from_=0, to=1, showvalue=0,
+                            orient=HORIZONTAL, command=self._scale_changed, sliderlength=20, length=40,
+                            highlightthickness=0, background="white")
+        self._scale.place(x=switch_x, y=y)
+        self._scale.set(int(is_on))
+        self._scale_changed(self._scale.get())
+        
+        right_label = Label(root, text=on_label, background="white", anchor="w", font=("Arial", 13))
+        right_label.place(x=switch_x+50, y=y)
+
+    def _scale_changed(self, value):
+        if int(value) == 1:
             self._pin.drive_low()
         else:
             self._pin.drive_high()
