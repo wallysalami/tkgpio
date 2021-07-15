@@ -6,7 +6,7 @@ from PIL import ImageEnhance, Image, ImageDraw, ImageFont, ImageTk
 from sounddevice import play, stop
 import numpy
 import scipy.signal
-from tkinter import Tk, Frame, Label, Button, Scale, HORIZONTAL, VERTICAL, CENTER
+from tkinter import Tk, Frame, Label, Button, Scale, Canvas, HORIZONTAL, VERTICAL, CENTER
 from threading import Thread, Timer
 from sys import path, exit
 from pathlib import Path
@@ -26,6 +26,7 @@ class TkCircuit(metaclass=SingletonMeta):
             "width": 500, "height": 500,
             "leds":[], "buzzers":[], "buttons":[],
             "lcds":[],
+            "motors":[],
             "motion_sensors": [],
             "distance_sensors": [],
             "light_sensors": [],
@@ -48,6 +49,7 @@ class TkCircuit(metaclass=SingletonMeta):
         self._outputs = []
         self._outputs += [self.add_device(TkLED, parameters) for parameters in setup["leds"]]
         self._outputs += [self.add_device(TkBuzzer, parameters) for parameters in setup["buzzers"]]
+        self._outputs += [self.add_device(TkMotor, parameters) for parameters in setup["motors"]]
         
         self._lcds = [self.add_device(TkLCD, parameters) for parameters in setup["lcds"]]
         
@@ -236,6 +238,40 @@ class TkLED(TkDevice):
             self._previous_state = self._pin.state
             
             self._redraw()
+            
+
+class TkMotor(TkDevice):
+    _image = None
+    
+    def __init__(self, root, x, y, name, forward_pin, backward_pin):
+        super().__init__(root, x, y, name)
+        
+        self._forward_pin = Device.pin_factory.pin(forward_pin)
+        self._backward_pin = Device.pin_factory.pin(backward_pin)
+        
+        TkMotor._image = self._set_image_for_state("motor.png", "normal", (60, 60))
+        
+        self._canvas = Canvas(self._root, width=60, height=60)
+        self._canvas.place(x=x, y=y)
+        self._canvas_object = None
+        
+        self._angle = 0
+        
+    def angle_speed(self):
+        if self._forward_pin.state > 0:
+            return -self._forward_pin.state * 20
+        else:
+            return self._backward_pin.state * 20
+           
+    def update(self):
+        if self._canvas_object != None:
+            self._canvas.delete(self._canvas_object)
+        self._photo_image = ImageTk.PhotoImage(TkMotor._image.rotate(self._angle, resample=Image.BICUBIC))
+        self._canvas_object = self._canvas.create_image(33, 33, image=self._photo_image)
+        self._canvas.update()
+        
+        self._angle += self.angle_speed()
+        self._angle %= 360
         
         
 class TkButton(TkDevice):
