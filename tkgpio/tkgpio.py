@@ -27,7 +27,7 @@ class TkCircuit(metaclass=SingletonMeta):
             "leds":[], "buzzers":[],
             "buttons":[], "toggles": [],
             "lcds":[],
-            "motors":[],
+            "motors":[], "servos":[],
             "motion_sensors": [],
             "distance_sensors": [],
             "light_sensors": [],
@@ -51,6 +51,7 @@ class TkCircuit(metaclass=SingletonMeta):
         self._outputs += [self.add_device(TkLED, parameters) for parameters in setup["leds"]]
         self._outputs += [self.add_device(TkBuzzer, parameters) for parameters in setup["buzzers"]]
         self._outputs += [self.add_device(TkMotor, parameters) for parameters in setup["motors"]]
+        self._outputs += [self.add_device(TkServo, parameters) for parameters in setup["servos"]]
         
         self._lcds = [self.add_device(TkLCD, parameters) for parameters in setup["lcds"]]
         
@@ -276,6 +277,57 @@ class TkMotor(TkDevice):
         
         self._angle += self.angle_speed()
         self._angle %= 360
+        
+        
+class TkServo(TkDevice):
+    _base_image = None
+    _arm_image = None
+    
+    def __init__(self, root, x, y, name, pin, initial_angle=0, min_angle=-90, max_angle=90, min_pulse_width=1/1000, max_pulse_width=2/1000):
+        super().__init__(root, x, y, name)
+        
+        self._pin = Device.pin_factory.pin(pin)
+        self._min_angle = min_angle
+        self._max_angle = max_angle
+        self._min_pulse_width = min_pulse_width
+        self._max_pulse_width = max_pulse_width
+        
+        TkServo._base_image = self._set_image_for_state("servo_base.png", "normal", (75, 27))
+        TkServo._arm_image = self._set_image_for_state("servo_arm.png", "normal")
+        
+        self._canvas = Canvas(self._root, width=100, height=90)
+        self._canvas.place(x=x, y=y)
+        self._canvas_object = None
+        
+        self._base_photo_image = ImageTk.PhotoImage(TkServo._base_image)
+        base_object = self._canvas.create_image(40, 48, image=self._base_photo_image)
+        self._canvas.update()
+        
+        self._angle = initial_angle
+        self._previous_angle = initial_angle
+        
+    def _update_angle(self):
+        if self._pin._frequency == None:
+            return
+        pulse_width = self._pin._state * (1 / self._pin._frequency)
+        pulse_width = min(self._max_pulse_width, max(pulse_width, self._min_pulse_width))
+        
+        a = (self._max_angle - self._min_angle) / (self._max_pulse_width - self._min_pulse_width)
+        b = self._max_angle - a * self._max_pulse_width
+        self._angle = a * pulse_width + b
+        
+    def update(self):
+        self._update_angle()
+        
+        if self._previous_angle != self._angle:        
+            if self._canvas_object != None:
+                self._canvas.delete(self._canvas_object)
+            rotated_image = TkServo._arm_image.rotate(self._angle, resample=Image.BICUBIC)
+            self._arm_photo_image = ImageTk.PhotoImage(rotated_image)
+            self._canvas_object = self._canvas.create_image(57, 48, image=self._arm_photo_image)
+            self._canvas.update()
+            
+            self._previous_angle = self._angle
         
         
 class TkButton(TkDevice):
