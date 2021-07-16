@@ -254,7 +254,7 @@ class TkMotor(TkDevice):
         self._forward_pin = Device.pin_factory.pin(forward_pin)
         self._backward_pin = Device.pin_factory.pin(backward_pin)
         
-        TkMotor._image = self._set_image_for_state("motor.png", "normal", (60, 60))
+        TkMotor._image = self._set_image_for_state("motor.png", "normal")
         
         self._canvas = Canvas(self._root, width=60, height=60)
         self._canvas.place(x=x, y=y)
