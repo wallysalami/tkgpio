@@ -274,7 +274,8 @@ class TkMotor(TkDevice):
         
         TkMotor._image = self._set_image_for_state("motor.png", "normal")
         
-        self._canvas = Canvas(self._root, width=60, height=60)
+        self._canvas = Canvas(self._root, width=60, height=60,
+                              background="white", borderwidth=0, highlightthickness=0)
         self._canvas.place(x=x, y=y)
         self._canvas_object = None
         
@@ -290,7 +291,7 @@ class TkMotor(TkDevice):
         if self._canvas_object != None:
             self._canvas.delete(self._canvas_object)
         self._photo_image = ImageTk.PhotoImage(TkMotor._image.rotate(self._angle, resample=Image.BICUBIC))
-        self._canvas_object = self._canvas.create_image(33, 33, image=self._photo_image)
+        self._canvas_object = self._canvas.create_image(30, 30, image=self._photo_image)
         self._canvas.update()
         
         self._angle += self.angle_speed()
@@ -313,12 +314,13 @@ class TkServo(TkDevice):
         TkServo._base_image = self._set_image_for_state("servo_base.png", "normal", (75, 27))
         TkServo._arm_image = self._set_image_for_state("servo_arm.png", "normal")
         
-        self._canvas = Canvas(self._root, width=100, height=90)
+        self._canvas = Canvas(self._root, width=100, height=90,
+                              background="white", borderwidth=0, highlightthickness=0)
         self._canvas.place(x=x, y=y)
         self._canvas_object = None
         
         self._base_photo_image = ImageTk.PhotoImage(TkServo._base_image)
-        base_object = self._canvas.create_image(40, 48, image=self._base_photo_image)
+        base_object = self._canvas.create_image(37, 45, image=self._base_photo_image)
         self._canvas.update()
         
         self._angle = initial_angle
@@ -342,7 +344,7 @@ class TkServo(TkDevice):
                 self._canvas.delete(self._canvas_object)
             rotated_image = TkServo._arm_image.rotate(self._angle, resample=Image.BICUBIC)
             self._arm_photo_image = ImageTk.PhotoImage(rotated_image)
-            self._canvas_object = self._canvas.create_image(57, 48, image=self._arm_photo_image)
+            self._canvas_object = self._canvas.create_image(54, 45, image=self._arm_photo_image)
             self._canvas.update()
             
             self._previous_angle = self._angle
