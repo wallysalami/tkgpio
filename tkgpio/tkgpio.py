@@ -32,8 +32,8 @@ class TkCircuit(metaclass=SingletonMeta):
             "distance_sensors": [],
             "light_sensors": [],
             "adc": None,
-            "infrared_receiver": None,
-            "infrared_emitter": None
+            "infrared_receiver": None, "infrared_emitter": None,
+            "labels": [],
         }
         
         default_setup.update(setup)
@@ -46,6 +46,9 @@ class TkCircuit(metaclass=SingletonMeta):
         self._root["background"] = "white"
         self._root.protocol("WM_DELETE_WINDOW", self._on_closing)
         self._root.tk.call("tk", "scaling", 1.0)
+        
+        for parameters in setup["labels"]:
+            self.add_device(TkLabel, parameters)
         
         self._outputs = []
         self._outputs += [self.add_device(TkLED, parameters) for parameters in setup["leds"]]
@@ -104,6 +107,21 @@ class TkCircuit(metaclass=SingletonMeta):
             
     def _on_closing(self):
         exit()
+  
+  
+class TkLabel:
+    def __init__(self, root, x, y, text="", font_family="Arial", font_size=13, **kwargs):
+        default_setup = {
+            "text": text,
+            "font": (font_family, font_size),
+            "background": "white",
+        }
+        
+        default_setup.update(kwargs)
+        kwargs = default_setup
+        
+        text_label = Label(root, **kwargs)
+        text_label.place(x=x, y=y)
         
         
 class TkLCD(TkDevice):
