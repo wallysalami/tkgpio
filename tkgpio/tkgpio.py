@@ -206,7 +206,7 @@ class TkBuzzer(TkDevice):
         
         self._set_image_for_state("buzzer_on.png", "on", (50, 33))
         self._set_image_for_state("buzzer_off.png", "off", (50, 33))
-        self._create_main_widget(Label, "off")
+        self._create_main_widget(Label, "off", x_offset=-15)
         
         if frequency != None:
             n_samples = self.SAMPLE_RATE
@@ -243,8 +243,8 @@ class TkLED(TkDevice):
         
         self._previous_state = None
         
-        TkLED.on_image = self._set_image_for_state("led_on.png", "on", (30, 30))
-        self._set_image_for_state("led_off.png", "off", (30, 30))
+        TkLED.on_image = self._set_image_for_state("led_on.png", "on", (19, 30))
+        self._set_image_for_state("led_off.png", "off", (19, 30))
         self._create_main_widget(Label, "off")
         
     def update(self):
@@ -477,7 +477,7 @@ class TkDistanceSensor(TkDevice):
         self._echo_pin._bounce = 0
         self._trigger_pin._bounce = 0
         
-        self._set_image_for_state("distance_sensor.png", "normal", (86, 50))
+        self._set_image_for_state("distance_sensor.png", "normal", (83, 50))
         self._create_main_widget(Label, "normal")
         
         self._scale = Scale(root, from_=min_distance, to=max_distance,

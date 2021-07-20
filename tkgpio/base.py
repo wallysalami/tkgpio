@@ -40,9 +40,9 @@ class TkDevice():
     def _redraw(self):
         self._root.update()
     
-    def _create_main_widget(self, widget_class, initial_state=None):
+    def _create_main_widget(self, widget_class, initial_state=None, x_offset=0, y_offset=0):
         self._widget = widget_class(self._root, background="white")
-        self._widget.place(x=self._x, y=self._y)
+        self._widget.place(x=self._x+x_offset, y=self._y+y_offset)
         
         if initial_state != None:
             self._change_widget_image(initial_state)
