@@ -4,7 +4,7 @@
 from setup import run
 
 @run
-def programa():
+def main():
     
     from gpiozero import PWMLED, Motor, Servo, MCP3008, Button
     from time import sleep
