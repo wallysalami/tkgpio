@@ -1,6 +1,7 @@
 from gpiozero.pins.mock import MockFactory, MockTriggerPin, MockPWMPin, MockChargingPin
 from gpiozero.pins.local import SPI
 from gpiozero import SPIBadChannel
+from gpiozero.devices import GPIOMeta, GPIOBase
 from PIL import ImageTk, Image
 from time import sleep, perf_counter
 from os import path
@@ -16,6 +17,10 @@ class SingletonMeta(type):
             instance = super().__call__(*args, **kwargs)
             cls._instances[cls] = instance
         return cls._instances[cls]
+    
+    
+class SingletonGPIOMeta(SingletonMeta, GPIOMeta):
+    pass
 
 
 class TkDevice():
@@ -89,7 +94,7 @@ class PreciseMockTriggerPin(MockTriggerPin, MockPWMPin):
         self.echo_pin.drive_low()
         
         
-class MockSPI(SPI, metaclass=SingletonMeta):
+class MockSPI(SPI, metaclass=SingletonGPIOMeta if issubclass(SPI, GPIOBase) else SingletonMeta):
     
     def __init__(self, *args, **kwargs):
         self._values = {}
@@ -161,6 +166,9 @@ class PreciseMockFactory(MockFactory):
             ('software', 'exclusive'): MockSPI,
             ('software', 'shared'):    MockSPI,
         }
+        
+    def spi(self, **spi_args):
+        return MockSPI()
       
     @staticmethod
     def ticks():
