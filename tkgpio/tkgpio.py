@@ -324,7 +324,8 @@ class TkServo(TkDevice):
         self._canvas.update()
         
         self._angle = initial_angle
-        self._previous_angle = initial_angle
+        self._previous_angle = None
+        self.update()
         
     def _update_angle(self):
         if self._pin._frequency == None:
