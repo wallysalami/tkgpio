@@ -114,7 +114,7 @@ class TkLabel:
         default_setup = {
             "text": text,
             "font": (font_family, font_size),
-            "background": "white",
+            "background": "white", "foreground": "black",
         }
         
         default_setup.update(kwargs)
@@ -390,7 +390,7 @@ class TkToggle(TkDevice):
         self._pin = Device.pin_factory.pin(pin)
         
         if off_label != "" and off_label != None:
-            left_label = Label(root, text=off_label, background="white", anchor="w", font=("Arial", 13))
+            left_label = Label(root, text=off_label, background="white", foreground="black", anchor="w", font=("Arial", 13))
             left_label.place(x=x, y=y)
             left_label.update()
             switch_x = x + left_label.winfo_width()
@@ -404,7 +404,7 @@ class TkToggle(TkDevice):
         self._scale.set(int(is_on))
         self._scale_changed(self._scale.get())
         
-        right_label = Label(root, text=on_label, background="white", anchor="w", font=("Arial", 13))
+        right_label = Label(root, text=on_label, background="white", foreground="black", anchor="w", font=("Arial", 13))
         right_label.place(x=switch_x+50, y=y)
 
     def _scale_changed(self, value):
@@ -481,7 +481,8 @@ class TkDistanceSensor(TkDevice):
         self._create_main_widget(Label, "normal")
         
         self._scale = Scale(root, from_=min_distance, to=max_distance,
-            orient=HORIZONTAL, command=self._scale_changed, sliderlength=20, length=150, highlightthickness = 0, background="white")
+            orient=HORIZONTAL, command=self._scale_changed, sliderlength=20, length=150,
+                            highlightthickness = 0, background="white", foreground="black")
         self._scale.place(x=x+100, y=y)
         self._scale.set(round((min_distance + max_distance) / 2))
         self._scale_changed(self._scale.get())
