@@ -1,7 +1,8 @@
 # tkgpio
 A Python library to simulate electronic devices connected to the GPIO on a Raspberry Pi, using TkInter.
 
-<img src="https://user-images.githubusercontent.com/2084188/92945917-5a5cf000-f42c-11ea-820d-e460cf53e5b0.png" width="600">
+<img src="https://user-images.githubusercontent.com/2084188/126525595-5b16f74f-c9bb-4828-be3c-79971756ac5a.png" width="600">
+<img src="https://user-images.githubusercontent.com/2084188/126411751-eddab125-392b-49ae-a007-73275abaa44d.png" width="600">
 
 
 ## About
@@ -17,15 +18,20 @@ TkGPIO currently supports the following devices:
 - Some [gpiozero](https://github.com/gpiozero/gpiozero) components (more coming soon)
   - LED / PWMLED
   - (Active) Buzzer
-  - Button
+  - DC Motor
+  - Servomotor
+  - Push Button
+  - Toggle Switch
   - Distance Sensor (HC-SR04)
   - Light Sensor (LDR)
   - Motion Sensor (HC-SR501)
+  - Potentiometer (via MCP3xxx chip)
 - LCD display (reimplementing [Adafruit_CharLCD API](https://github.com/adafruit/Adafruit_Python_CharLCD))
   - Only `message` and `clear` methods are supported for now (more coming soon)
 - Infrared emmitter (reimplementing [py_irsend API](https://github.com/ChristopherRogers1991/python-irsend))
 - Infrared receiver (reimplementing [python-lirc API](https://github.com/tompreston/python-lirc))
 
+TkGPIO also supports labels with text, border and background color.
 
 ## Usage
 
@@ -36,7 +42,7 @@ This is a simple example to create and control 2 LEDs and 1 Button.
 ```python3
 from tkgpio import TkCircuit
 
-# initialize the circuit inside the 
+# initialize the circuit inside the GUI
 
 configuration = {
     "width": 300,
@@ -82,10 +88,8 @@ Check more sample code files in `docs/examples`.
 
 ## Instalation
 
-Download/clone this repository, open your Terminal, navigate to tkgpio's root folder, and use PyPI:
+Use PyPI to install TkGPIO in your computer.
 
 ```bash
-pip install .
+pip install tkgpio
 ```
-
-I'll upload it to PyPI later on, after a few tweaks.
