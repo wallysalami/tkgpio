@@ -279,7 +279,7 @@ class TkRGBLED(TkDevice):
         self._bpin = Device.pin_factory.pin(bpin)
         
         self._previous_state = None
-        self._current_state = (self._rpin.state, self._gpin.state, self._bpin.state)
+        self._current_state = None
         
         TkRGBLED.image = self._set_image_for_state("rgb_led_off.png", "off", (19, 30))
         self._create_main_widget(Label, "off",20)
@@ -314,9 +314,8 @@ class TkRGBLED(TkDevice):
             background=TkRGBLED.image.convert("RGBA")
             overlay=Image.new("RGBA",background.size,(255,255,255,0))
             draw=ImageDraw.Draw(overlay)
-            draw.ellipse([2,0,16,14],(r,g,b),(0,0,0),1)
-            draw.rectangle([2,7,16,14],(r,g,b),(0,0,0),1)
-            draw.rectangle([3,7,15,14],(r,g,b),None,1)
+            draw.ellipse([3,1,15,13],(r,g,b),None,1)
+            draw.rectangle([3,7,15,13],(r,g,b),None,1)
             draw.rectangle([0,16,18,20],(r,g,b),(0,0,0),1)
             out = Image.alpha_composite(background, overlay)
             self._change_widget_image(out)
