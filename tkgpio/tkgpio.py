@@ -24,7 +24,8 @@ class TkCircuit(metaclass=SingletonMeta):
         default_setup = {
             "name": "Virtual GPIO",
             "width": 500, "height": 500,
-            "leds":[], "buzzers":[],
+            "buzzers":[],
+            "leds":[], "rgb_leds":[],
             "buttons":[], "toggles": [],
             "lcds":[],
             "motors":[], "servos":[],
@@ -33,7 +34,7 @@ class TkCircuit(metaclass=SingletonMeta):
             "light_sensors": [],
             "adc": None,
             "infrared_receiver": None, "infrared_emitter": None,
-            "labels": [],"rgb_leds":[],
+            "labels": [],
         }
         
         default_setup.update(setup)
@@ -51,11 +52,11 @@ class TkCircuit(metaclass=SingletonMeta):
             self.add_device(TkLabel, parameters)
         
         self._outputs = []
-        self._outputs += [self.add_device(TkLED, parameters) for parameters in setup["leds"]]
         self._outputs += [self.add_device(TkBuzzer, parameters) for parameters in setup["buzzers"]]
+        self._outputs += [self.add_device(TkLED, parameters) for parameters in setup["leds"]]
+        self._outputs += [self.add_device(TkRGBLED, parameters) for parameters in setup["rgb_leds"]]
         self._outputs += [self.add_device(TkMotor, parameters) for parameters in setup["motors"]]
         self._outputs += [self.add_device(TkServo, parameters) for parameters in setup["servos"]]
-        self._outputs += [self.add_device(TkRGBLED, parameters) for parameters in setup["rgb_leds"]]
         
         self._lcds = [self.add_device(TkLCD, parameters) for parameters in setup["lcds"]]
         
@@ -266,53 +267,59 @@ class TkLED(TkDevice):
 class TkRGBLED(TkDevice):
     image = None
     
-    def __init__(self, root, x, y, name, rpin, gpin, bpin):
+    def __init__(self, root, x, y, name, red_pin, green_pin, blue_pin):
         super().__init__(root, x, y, name)
         
-        self._rpin = Device.pin_factory.pin(rpin)
-        self._gpin = Device.pin_factory.pin(gpin)
-        self._bpin = Device.pin_factory.pin(bpin)
+        self._red_pin = Device.pin_factory.pin(red_pin)
+        self._green_pin = Device.pin_factory.pin(green_pin)
+        self._blue_pin = Device.pin_factory.pin(blue_pin)
         
         self._previous_state = None
-        self._current_state = (self._rpin.state, self._gpin.state, self._bpin.state)
+        self._current_state = (self._red_pin.state, self._green_pin.state, self._blue_pin.state)
         
         TkRGBLED.image = self._set_image_for_state("rgb_led_off.png", "off", (19, 30))
-        self._create_main_widget(Label, "off",20)
+        self._create_main_widget(Label, "off")
         
     def update(self):
-        self._current_state=(self._rpin.state, self._gpin.state, self._bpin.state)
+        self._current_state = (self._red_pin.state, self._green_pin.state, self._blue_pin.state)
         if self._previous_state != self._current_state:
-            if (isinstance(self._rpin.state,bool)):
-                if (self._rpin.state==True):
-                    r=1.0
+            if isinstance(self._red_pin.state, bool):
+                if self._red_pin.state == True:
+                    r = 1.0
                 else:
-                    r=0.0
+                    r = 0.4
             else:
-                r=self._rpin.state
-            if (isinstance(self._gpin.state,bool)):
-                if (self._gpin.state==True):
-                    g=1.0
+                r = self._red_pin.state ** 0.3 * 0.6 + 0.4
+                
+            if isinstance(self._green_pin.state, bool):
+                if self._green_pin.state == True:
+                    g = 1.0
                 else:
-                    g=0.0
+                    g = 0.4
             else:
-                g=self._gpin.state
-            if (isinstance(self._bpin.state,bool)):
-                if (self._bpin.state==True):
-                    b=1.0
+                g = self._green_pin.state ** 0.3 * 0.6 + 0.4
+           
+            if isinstance(self._blue_pin.state, bool):
+                if self._blue_pin.state == True:
+                    b = 1.0
                 else:
-                    b=0.0
+                    b = 0.4
             else:
-                b=self._bpin.state
-            r=round(r*255)
-            g=round(g*255)
-            b=round(b*255)
-            background=TkRGBLED.image.convert("RGBA")
-            overlay=Image.new("RGBA",background.size,(255,255,255,0))
-            draw=ImageDraw.Draw(overlay)
-            draw.ellipse([2,0,16,14],(r,g,b),(0,0,0),1)
-            draw.rectangle([2,7,16,14],(r,g,b),(0,0,0),1)
-            draw.rectangle([3,7,15,14],(r,g,b),None,1)
-            draw.rectangle([0,16,18,20],(r,g,b),(0,0,0),1)
+                b = self._blue_pin.state ** 0.3 * 0.6 + 0.4
+            
+            a = (max(r,g,b) - 0.4) / 0.6
+            
+            fill_color = (round(r*255), round(g*255), round(b*255), round(a*255))
+            border_color = (round(r*220), round(g*220), round(b*220), round(a*220))
+            
+            background = TkRGBLED.image.convert("RGBA")
+            overlay = Image.new("RGBA", background.size, (255, 255, 255 ,0))
+            draw = ImageDraw.Draw(overlay)
+            draw.ellipse([(2,0), (16,14)], fill_color, border_color, 1)
+            draw.rectangle([(2,7), (16,14)], fill_color, border_color, 1)
+            draw.rectangle([(3,7), (15,13)], fill_color)
+            draw.rectangle([(0,16), (18,20)], fill_color, border_color, 1)
+            
             out = Image.alpha_composite(background, overlay)
             self._change_widget_image(out)
              
