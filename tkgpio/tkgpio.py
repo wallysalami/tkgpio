@@ -283,35 +283,13 @@ class TkRGBLED(TkDevice):
     def update(self):
         self._current_state = (self._red_pin.state, self._green_pin.state, self._blue_pin.state)
         if self._previous_state != self._current_state:
-            if isinstance(self._red_pin.state, bool):
-                if self._red_pin.state == True:
-                    r = 1.0
-                else:
-                    r = 0.4
-            else:
-                r = self._red_pin.state ** 0.3 * 0.6 + 0.4
+            alpha = max(self._current_state)
+            rgba_components = [value ** 0.3 * 0.6 + 0.4 for value in self._current_state]
+            rgba_components.append(alpha)
+            
+            fill_color = tuple(round(value * 255) for value in rgba_components)
+            border_color = tuple(round(value * 220) for value in rgba_components)
                 
-            if isinstance(self._green_pin.state, bool):
-                if self._green_pin.state == True:
-                    g = 1.0
-                else:
-                    g = 0.4
-            else:
-                g = self._green_pin.state ** 0.3 * 0.6 + 0.4
-           
-            if isinstance(self._blue_pin.state, bool):
-                if self._blue_pin.state == True:
-                    b = 1.0
-                else:
-                    b = 0.4
-            else:
-                b = self._blue_pin.state ** 0.3 * 0.6 + 0.4
-            
-            a = (max(r,g,b) - 0.4) / 0.6
-            
-            fill_color = (round(r*255), round(g*255), round(b*255), round(a*255))
-            border_color = (round(r*220), round(g*220), round(b*220), round(a*220))
-            
             background = TkRGBLED.image.convert("RGBA")
             overlay = Image.new("RGBA", background.size, (255, 255, 255 ,0))
             draw = ImageDraw.Draw(overlay)
