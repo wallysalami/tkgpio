@@ -61,14 +61,14 @@ class TkCircuit(metaclass=SingletonMeta):
         
         if setup["adc"] != None:
             spi = TkSPI(setup["adc"]["mcp_chip"])
-            if setup["adc"]["potenciometers"] !=None:
+            if "potenciometers" in setup["adc"]:
                 for parameters in setup["adc"]["potenciometers"]:
                     parameters["tk_spi"] = spi
                     self.add_device(TkPotentiometer, parameters)
-            if setup["adc"]["temp_sensors"] !=None:
-                for parameters in setup["adc"]["temp_sensors"]:
+            if "temperature_sensors" in setup["adc"]:
+                for parameters in setup["adc"]["temperature_sensors"]:
                     parameters["tk_spi"] = spi
-                    self.add_device(TkTempSensor, parameters)    
+                    self.add_device(TkTemperatureSensor, parameters)     
         
         for parameters in setup["buttons"]:
             self.add_device(TkButton, parameters)
@@ -279,7 +279,7 @@ class TkRGBLED(TkDevice):
         self._bpin = Device.pin_factory.pin(bpin)
         
         self._previous_state = None
-        self._current_state = None
+        self._current_state = (self._rpin.state, self._gpin.state, self._bpin.state)
         
         TkRGBLED.image = self._set_image_for_state("rgb_led_off.png", "off", (19, 30))
         self._create_main_widget(Label, "off",20)
@@ -314,8 +314,9 @@ class TkRGBLED(TkDevice):
             background=TkRGBLED.image.convert("RGBA")
             overlay=Image.new("RGBA",background.size,(255,255,255,0))
             draw=ImageDraw.Draw(overlay)
-            draw.ellipse([3,1,15,13],(r,g,b),None,1)
-            draw.rectangle([3,7,15,13],(r,g,b),None,1)
+            draw.ellipse([2,0,16,14],(r,g,b),(0,0,0),1)
+            draw.rectangle([2,7,16,14],(r,g,b),(0,0,0),1)
+            draw.rectangle([3,7,15,14],(r,g,b),None,1)
             draw.rectangle([0,16,18,20],(r,g,b),(0,0,0),1)
             out = Image.alpha_composite(background, overlay)
             self._change_widget_image(out)
@@ -594,17 +595,19 @@ class TkPotentiometer(TkDevice):
     def _scale_changed(self, value):
         self._tk_spi.mock_spi.set_value_for_channel(float(value), self._channel)
 
-class TkTempSensor(TkDevice):
-    def __init__(self, root, x, y, name, tk_spi, channel):
+class TkTemperatureSensor(TkDevice):
+    def __init__(self, root, x, y, name, tk_spi, channel, min_temperature, max_temperature):
         super().__init__(root, x, y, name)
         
         self._tk_spi = tk_spi
         self._channel = channel
+        temperature_range=max_temperature-min_temperature
+        scale_resolution=temperature_range/100
         
-        self._scale = Scale(root, from_=0, to=1, resolution=0.01, showvalue=0,
+        self._scale = Scale(root, from_=min_temperature, to=max_temperature, resolution=scale_resolution, showvalue=1,
             orient=HORIZONTAL, command=self._scale_changed, sliderlength=20, length=150, highlightthickness = 0, background="white")
         self._scale.place(x=x, y=y)
-        self._scale.set(0.5)
+        self._scale.set((temperature_range//2)+min_temperature)
         self._scale_changed(self._scale.get())
         
     def _scale_changed(self, value):
