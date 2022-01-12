@@ -282,39 +282,25 @@ class TkRGBLED(TkDevice):
     def update(self):
         self._current_state=(self._rpin.state, self._gpin.state, self._bpin.state)
         if self._previous_state != self._current_state:
-            if (isinstance(self._rpin.state,bool)):
-                if (self._rpin.state==True):
-                    r=1.0
-                else:
-                    r=0.0
-            else:
-                r=self._rpin.state
-            if (isinstance(self._gpin.state,bool)):
-                if (self._gpin.state==True):
-                    g=1.0
-                else:
-                    g=0.0
-            else:
-                g=self._gpin.state
-            if (isinstance(self._bpin.state,bool)):
-                if (self._bpin.state==True):
-                    b=1.0
-                else:
-                    b=0.0
-            else:
-                b=self._bpin.state
-            r=round(r*255)
-            g=round(g*255)
-            b=round(b*255)
+            r=round(self._rpin.state*255)
+            g=round(self._gpin.state*255)
+            b=round(self._bpin.state*255)
+            fill_color=(r,g,b)
+            alpha = max(self._current_state)
+            border_color=(204,204,204)
             background=TkRGBLED.image.convert("RGBA")
-            overlay=Image.new("RGBA",background.size,(255,255,255,0))
-            draw=ImageDraw.Draw(overlay)
-            draw.ellipse([2,0,16,14],(r,g,b),(0,0,0),1)
-            draw.rectangle([2,7,16,14],(r,g,b),(0,0,0),1)
-            draw.rectangle([3,7,15,14],(r,g,b),None,1)
-            draw.rectangle([0,16,18,20],(r,g,b),(0,0,0),1)
-            out = Image.alpha_composite(background, overlay)
-            self._change_widget_image(out)
+            bulb_off=self.bulb.convert("RGBA")
+            bulb_overlay=Image.new("RGBA",bulb_off.size,(255,255,255,0))
+            draw=ImageDraw.Draw(bulb_overlay)
+            draw.ellipse([2,0,16,14],fill_color,border_color,1)
+            draw.rectangle([2,7,16,14],fill_color,border_color,1)
+            draw.rectangle([(3,7), (15,13)], fill_color)
+            draw.rectangle([0,16,18,20],fill_color,border_color,1)
+            bulb_state = Image.blend(bulb_off, bulb_overlay,alpha)
+            bulb_out=Image.new("RGBA",background.size,(255,255, 255, 0))
+            bulb_out.paste(bulb_state,(0,0))
+            image_out = Image.alpha_composite(background, bulb_out)
+            self._change_widget_image(image_out)
              
             self._previous_state = self._current_state           
             self._redraw()
