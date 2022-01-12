@@ -236,21 +236,22 @@ class TkBuzzer(TkDevice):
 class TkLED(TkDevice):
     on_image = None
     
-    def __init__(self, root, x, y, name, pin):
+    def __init__(self, root, x, y, name, color, pin):
         super().__init__(root, x, y, name)
         
         self._pin = Device.pin_factory.pin(pin)
         
         self._previous_state = None
         
-        TkLED.on_image = self._set_image_for_state("led_on.png", "on", (19, 30))
+        led_color="led_on_"+color+".png"
+        self.on_image = self._set_image_for_state(led_color, "on", (19, 30))
         self._set_image_for_state("led_off.png", "off", (19, 30))
         self._create_main_widget(Label, "off")
         
     def update(self):
         if self._previous_state != self._pin.state:
             if isinstance(self._pin.state, float):
-                converter = ImageEnhance.Color(TkLED.on_image)
+                converter = ImageEnhance.Color(self.on_image)
                 desaturated_image = converter.enhance(self._pin.state)
                 self._change_widget_image(desaturated_image)
             elif self._pin.state == True:
