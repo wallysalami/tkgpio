@@ -242,25 +242,48 @@ class TkLED(TkDevice):
         self._pin = Device.pin_factory.pin(pin)
         
         self._previous_state = None
+        self._led_color=color
         
-        led_color="led_on_"+color+".png"
-        self.on_image = self._set_image_for_state(led_color, "on", (19, 30))
-        self._set_image_for_state("led_off.png", "off", (19, 30))
+        TkLED.image=self._set_image_for_state("led_off.png", "default", (19, 30))
+        self.bulb=self._set_image_for_state("led_bulb.png","off", (19,21))
         self._create_main_widget(Label, "off")
         
     def update(self):
         if self._previous_state != self._pin.state:
-            if isinstance(self._pin.state, float):
-                converter = ImageEnhance.Color(self.on_image)
-                desaturated_image = converter.enhance(self._pin.state)
-                self._change_widget_image(desaturated_image)
-            elif self._pin.state == True:
-                self._change_widget_image("on")
+            r=0
+            g=0
+            b=0
+            if self._led_color=="red":
+                r=255
+            elif self._led_color=="blue":
+                b=255
+            elif self._led_color=="green":
+                g=255
+            elif self._led_color=="yellow":
+                r=255
+                g=255
             else:
-                self._change_widget_image("off")
+                r=255
+                g=255
+                b=255
+            fill_color=(r,g,b)
+            alpha = self._pin.state
+            border_color=(204,204,204)
+            background=TkLED.image.convert("RGBA")
+            bulb_off=self.bulb.convert("RGBA")
+            bulb_overlay=Image.new("RGBA",bulb_off.size,(255,255,255,0))
+            draw=ImageDraw.Draw(bulb_overlay)
+            draw.ellipse([2,0,16,14],fill_color,border_color,1)
+            draw.rectangle([2,7,16,14],fill_color,border_color,1)
+            draw.rectangle([(3,7), (15,13)], fill_color)
+            draw.rectangle([0,16,18,20],fill_color,border_color,1)
+            bulb_state = Image.blend(bulb_off, bulb_overlay,alpha)
+            bulb_out=Image.new("RGBA",background.size,(255,255, 255, 0))
+            bulb_out.paste(bulb_state,(0,0))
+            image_out = Image.alpha_composite(background, bulb_out)
+            self._change_widget_image(image_out)
              
-            self._previous_state = self._pin.state
-            
+            self._previous_state = self._pin.state           
             self._redraw()
             
 
