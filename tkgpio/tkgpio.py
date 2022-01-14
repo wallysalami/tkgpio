@@ -276,9 +276,9 @@ class TkRGBLED(TkDevice):
         self._previous_state = None
         self._current_state = (self._rpin.state, self._gpin.state, self._bpin.state)
         
-        TkRGBLED.image = self._set_image_for_state("rgb_led_off.png", "off", (19, 30))
-        self.bulb=self._set_image_for_state("rgb_led_bulb.png","off", (19,21))
-        self._create_main_widget(Label, "off",20)
+        TkRGBLED.image = self._set_image_for_state("rgb_led_off.png", "default", (19, 30))
+        self.bulb=self._set_image_for_state("led_bulb.png","off", (19,21))
+        self._create_main_widget(Label, "default",20)
         
     def update(self):
         self._current_state=(self._rpin.state, self._gpin.state, self._bpin.state)
