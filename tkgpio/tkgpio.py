@@ -60,7 +60,7 @@ class TkCircuit(metaclass=SingletonMeta):
         
         if setup["adc"] != None:
             spi = TkSPI(setup["adc"]["mcp_chip"])
-            for parameters in setup["adc"]["potenciometers"]:
+            for parameters in setup["adc"]["potentiometers"]:
                 parameters["tk_spi"] = spi
                 self.add_device(TkPotentiometer, parameters)
                 
