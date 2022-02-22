@@ -55,15 +55,21 @@ class TkCircuit(metaclass=SingletonMeta):
         self._outputs += [self.add_device(TkBuzzer, parameters) for parameters in setup["buzzers"]]
         self._outputs += [self.add_device(TkMotor, parameters) for parameters in setup["motors"]]
         self._outputs += [self.add_device(TkServo, parameters) for parameters in setup["servos"]]
+        self._outputs += [self.add_device(TkRGBLED, parameters) for parameters in setup["rgb_leds"]]
         
         self._lcds = [self.add_device(TkLCD, parameters) for parameters in setup["lcds"]]
         
         if setup["adc"] != None:
             spi = TkSPI(setup["adc"]["mcp_chip"])
-            for parameters in setup["adc"]["potenciometers"]:
-                parameters["tk_spi"] = spi
-                self.add_device(TkPotentiometer, parameters)
-                
+            if "potenciometers" in setup["adc"]:
+                for parameters in setup["adc"]["potenciometers"]:
+                    parameters["tk_spi"] = spi
+                    self.add_device(TkPotentiometer, parameters)
+            if "temperature_sensors" in setup["adc"]:
+                for parameters in setup["adc"]["temperature_sensors"]:
+                    parameters["tk_spi"] = spi
+                    self.add_device(TkTemperatureSensor, parameters)     
+        
         for parameters in setup["buttons"]:
             self.add_device(TkButton, parameters)
             
@@ -262,7 +268,7 @@ class TkLED(TkDevice):
             
             self._redraw()
             
-
+            
 class TkMotor(TkDevice):
     _image = None
     
@@ -533,7 +539,33 @@ class TkPotentiometer(TkDevice):
         
     def _scale_changed(self, value):
         self._tk_spi.mock_spi.set_value_for_channel(float(value), self._channel)
-            
+
+class TkTemperatureSensor(TkDevice):
+    def __init__(self, root, x, y, name, tk_spi, channel, sensor_min_temperature, sensor_max_temperature, contextual_min_temperature, contextual_max_temperature):
+        super().__init__(root, x, y, name)
+        
+        self._tk_spi = tk_spi
+        self._channel = channel
+        self._sensor_min_temperature=sensor_min_temperature
+        self._sensor_temperature_range=sensor_max_temperature-sensor_min_temperature
+        contextual_temperature_range=contextual_max_temperature-contextual_min_temperature
+        scale_resolution=contextual_temperature_range/100.0
+        
+        self._scale = Scale(root, from_=contextual_min_temperature, to=contextual_max_temperature, resolution=scale_resolution, showvalue=1,
+            orient=HORIZONTAL, command=self._scale_changed, sliderlength=20, length=150, highlightthickness = 0, background="white")
+        self._scale.place(x=x, y=y)
+        self._scale.set((contextual_temperature_range//2)+contextual_min_temperature)
+        self._scale_changed(self._scale.get())
+        
+    def _scale_changed(self, value):
+        scaled_sensor_min=0
+        scaled_sensor_max=self._sensor_temperature_range
+        if (self._sensor_min_temperature<=0):
+            scaled_contextual_value=float(value)+abs(self._sensor_min_temperature)
+        else:
+            scaled_contextual_value=float(value)-abs(self._sensor_min_temperature)
+        output_value=scaled_contextual_value/scaled_sensor_max
+        self._tk_spi.mock_spi.set_value_for_channel(output_value, self._channel)
             
 class TkInfraredReceiver(TkDevice, metaclass=SingletonMeta):
 
@@ -630,3 +662,5 @@ class TkInfraredEmitter(TkDevice, metaclass=SingletonMeta):
     def _turn_off_emitter(self):
         self._change_widget_image("off")
         self._timer = None
+
+
