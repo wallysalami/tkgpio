@@ -58,7 +58,7 @@ class TkDevice():
 
             image = Image.open(file_path)
             if dimensions != None:
-                image = image.resize(dimensions, Image.ANTIALIAS)
+                image = image.resize(dimensions, Image.LANCZOS)
             
             TkDevice._images[image_file_name] = image
             
