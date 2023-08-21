@@ -432,7 +432,7 @@ class TkMotionSensor(TkDevice):
         self._set_image_for_state("motion_sensor_wait.png", "wait", (80, 60))
         self._create_main_widget(Label, "no motion")
         
-        root.bind('<Motion>', self._motion_detected)
+        root.bind('<Motion>', self._motion_detected, add="+")
         
     def _motion_detected(self, event):
         x_pointer = self._root.winfo_pointerx() - self._root.winfo_rootx()
