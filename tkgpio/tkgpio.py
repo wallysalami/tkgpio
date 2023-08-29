@@ -3,9 +3,6 @@ from .base import PreciseMockTriggerPin, PreciseMockFactory, PreciseMockCharging
 from gpiozero import Device
 from gpiozero.pins.mock import MockPWMPin, MockSPIDevice
 from PIL import ImageEnhance, Image, ImageDraw, ImageFont, ImageTk
-from sounddevice import play, stop
-import numpy
-import scipy.signal
 from tkinter import Tk, Frame, Label, Button, Scale, Canvas, HORIZONTAL, VERTICAL, CENTER
 from threading import Thread, Timer
 from sys import path, exit
@@ -195,8 +192,16 @@ class TkLCD(TkDevice):
         
 class TkBuzzer(TkDevice):
     SAMPLE_RATE = 44000
-    PEAK = 0.1
-    DUTY_CICLE = 0.5
+    PEAK = 0.05
+    
+    try:
+        import sounddevice
+        import numpy
+        _sounddevice = sounddevice
+        _numpy = numpy
+    except Exception:
+        _sounddevice = None
+        _numpy = None
     
     def __init__(self, root, x, y, name, pin, frequency=440):
         super().__init__(root, x, y, name)
@@ -208,30 +213,35 @@ class TkBuzzer(TkDevice):
         self._set_image_for_state("buzzer_off.png", "off", (50, 33))
         self._create_main_widget(Label, "off", x_offset=-15)
         
-        if frequency != None:
-            n_samples = self.SAMPLE_RATE
-            t = numpy.linspace(0, 1, int(500 * 440/frequency), endpoint=False)
-            wave = scipy.signal.square(2 * numpy.pi * 5 * t, duty=self.DUTY_CICLE)
-            wave = numpy.resize(wave, (n_samples,))
-            self._sample_wave = (self.PEAK / 2 * wave.astype(numpy.int16))
+        if frequency != None and TkBuzzer._numpy != None:
+            n_samples = TkBuzzer.SAMPLE_RATE
+            t = TkBuzzer._numpy.linspace(0, 1, n_samples, endpoint=False)
+            sine = TkBuzzer._numpy.sin(2 * TkBuzzer._numpy.pi * frequency * t)
+            self._square_wave = TkBuzzer.PEAK * TkBuzzer._numpy.sign(sine)
         else:
-            self._sample_wave = numpy.empty(0)
+            self._square_wave = None
         
     def update(self):
         if self._previous_state != self._pin.state:
             if self._pin.state == True:
                 self._change_widget_image("on")
-                if len(self._sample_wave) > 0:
-                    play(self._sample_wave, self.SAMPLE_RATE, loop=True)
+                self._play_sound()
             else:
                 self._change_widget_image("off")
-                if len(self._sample_wave) > 0:
-                    stop()
+                self._stop_sound()
             
             self._previous_state = self._pin.state
             
             self._redraw()
+            
+    def _play_sound(self):
+        if self._square_wave is not None and TkBuzzer._sounddevice != None:
+            TkBuzzer._sounddevice.play(self._square_wave, self.SAMPLE_RATE, loop=True)
     
+    def _stop_sound(self):
+        if TkBuzzer._sounddevice is not None:
+            TkBuzzer._sounddevice.stop()
+            
 
 class TkLED(TkDevice):
     on_image = None
