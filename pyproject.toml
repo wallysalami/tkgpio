@@ -1,0 +1,40 @@
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "tkgpio"
+version = "0.1"
+description = "A Python library to simulate Raspberry Pi GPIO devices in TkInter"
+authors = ["Jan K. S. <developer@janks.dev.br>"]
+include = ["resources/**/*"]
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/wallysalami/tkgpio"
+keywords = [
+    "raspberrypi",
+    "gpio",
+    "tkinter"
+]
+classifiers = [
+    "Intended Audience :: Education",
+    "Intended Audience :: Developers",
+    "Topic :: Education",
+    "Topic :: System :: Hardware",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[tool.poetry.dependencies]
+python = "^3.5"
+gpiozero = "*"
+Pillow = "*"
+numpy = {version = "*", optional = true}
+sounddevice = {version = "*", optional = true}
+
+[tool.poetry.extras]
+sound = [
+    "numpy",
+    "sounddevice"
+]
