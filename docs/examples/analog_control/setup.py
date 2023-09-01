@@ -17,7 +17,7 @@ configuration = {
     
     "adc": {
       "mcp_chip": 3008,
-      "potenciometers": [
+      "potentiometers": [
         {"x": 40,  "y": 200, "name": "Brightness Potentiometer", "channel": 0},
         {"x": 270, "y": 200, "name": "Speed Potentiometer",      "channel": 2},
         {"x": 500, "y": 200, "name": "Angle Potentiometer",      "channel": 6}
