@@ -191,8 +191,9 @@ class TkLCD(TkDevice):
         
         
 class TkBuzzer(TkDevice):
-    SAMPLE_RATE = 44000
-    PEAK = 0.05
+    SAMPLE_RATE = 44100
+    SIGNAL_DURATION = 0.1
+    AMPLITUDE = 0.1
     
     try:
         import sounddevice
@@ -213,13 +214,21 @@ class TkBuzzer(TkDevice):
         self._set_image_for_state("buzzer_off.png", "off", (50, 33))
         self._create_main_widget(Label, "off", x_offset=-15)
         
+        self._stream = None
+        
         if frequency != None and TkBuzzer._numpy != None:
-            n_samples = TkBuzzer.SAMPLE_RATE
-            t = TkBuzzer._numpy.linspace(0, 1, n_samples, endpoint=False)
-            sine = TkBuzzer._numpy.sin(2 * TkBuzzer._numpy.pi * frequency * t)
-            self._square_wave = TkBuzzer.PEAK * TkBuzzer._numpy.sign(sine)
+            # adjust the duration to match a multiple of the signal period
+            period = 1 / frequency
+            duration = TkBuzzer.SIGNAL_DURATION + (period - TkBuzzer.SIGNAL_DURATION % period)
+            
+            np = TkBuzzer._numpy
+            n_samples = int(TkBuzzer.SAMPLE_RATE * duration)
+            t = np.linspace(0, duration, n_samples, endpoint=False)
+            sine = np.sin(2 * np.pi * frequency * t)
+            square_wave = np.sign(sine)
+            self._sample_wave = (TkBuzzer.AMPLITUDE / 2 * square_wave.astype(np.int16))
         else:
-            self._square_wave = None
+            self._sample_wave = None
         
     def update(self):
         if self._previous_state != self._pin.state:
@@ -235,12 +244,34 @@ class TkBuzzer(TkDevice):
             self._redraw()
             
     def _play_sound(self):
-        if self._square_wave is not None and TkBuzzer._sounddevice != None:
-            TkBuzzer._sounddevice.play(self._square_wave, self.SAMPLE_RATE, loop=True)
+        if TkBuzzer._sounddevice != None and self._sample_wave is not None:
+            self._playback_position = 0
+            self._stream = TkBuzzer._sounddevice.OutputStream(
+                callback=lambda *args: self._sound_callback(*args),
+                channels=1,
+                samplerate=TkBuzzer.SAMPLE_RATE
+            )
+            self._stream.start()
     
     def _stop_sound(self):
-        if TkBuzzer._sounddevice is not None:
-            TkBuzzer._sounddevice.stop()
+        if self._stream != None:
+            self._stream.stop()
+            
+    def _sound_callback(self, outdata, frames, time, status):
+        remaining_frames = len(self._sample_wave) - self._playback_position
+
+        if remaining_frames >= frames:
+            segment = self._sample_wave[self._playback_position:self._playback_position + frames]
+            outdata[:] = segment.reshape(-1, 1)
+            self._playback_position += frames
+        else:
+            # Loop back to the beginning
+            segment1 = self._sample_wave[self._playback_position:]
+            segment2 = self._sample_wave[0 : frames - remaining_frames]
+            segment = TkBuzzer._numpy.concatenate((segment1, segment2))
+            outdata[:] = segment.reshape(-1, 1)
+            self._playback_position = frames - remaining_frames
+
             
 
 class TkLED(TkDevice):
