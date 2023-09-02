@@ -97,5 +97,5 @@ pip install tkgpio
 By default, buzzers will flash on the window but will not play any sound. To enable that, install `numpy` and `sounddevice`, or install tkgpio using the command
 
 ```bash
-pip install tkgpio[sound]
+pip install 'tkgpio[sound]'
 ```
