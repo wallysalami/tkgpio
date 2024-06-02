@@ -1,0 +1,153 @@
+ This is a sample Python script.
+
+from time import sleep
+
+from threading import Timer  # non-blocking timer
+
+from pynput.keyboard import Listener
+
+from pynput import keyboard
+
+from enum import Enum
+
+from os import system
+
+
+
+
+
+class State(Enum):
+
+    onEntryIdle = 0
+
+    onStayIdle = 1
+
+    onEntryWarmUp = 2
+
+    onStayWarmUp = 3
+
+    onEntryActive = 4
+
+    onStayActive = 5
+
+
+
+
+
+current = State.onEntryIdle
+
+
+
+
+
+# listener function definition to which the pressed key is sent
+
+def on_press(key):
+
+    global current
+
+    print('{0} pressed'.format(key))
+
+    if key == keyboard.Key.right:  # SPB
+
+        if current == State.onStayIdle:
+
+            current = State.onEntryWarmUp
+
+    elif key == keyboard.Key.left:  # ES
+
+        if current == State.onStayActive:
+
+            current = State.onEntryIdle
+
+
+
+
+
+Listener(on_press=on_press).start()  # starting the listener
+
+
+
+
+
+# output function
+
+def output(Motor=False, Led=False):
+
+    print("Motor: ", Motor, "m/s")
+
+    print("Led: ", Led)
+
+
+
+
+
+def TimertoActive():
+
+    global current
+
+    current = State.onEntryActive
+
+
+
+
+
+def TimertoIdle():
+
+    global current
+
+    current = State.onEntryIdle
+
+
+
+
+
+while True:
+
+    print("State:", current)
+
+    if current == State.onEntryIdle:
+
+        current = State.onStayIdle
+
+    elif current == State.onStayIdle:
+
+        output(Motor=0, Led=0)
+
+    elif current == State.onEntryWarmUp:
+
+        Timer(10.0, TimertoActive).start()
+
+        current = State.onStayWarmUp
+
+
+
+
+
+    elif current == State.onStayWarmUp:
+
+        output(Motor=2, Led=1)
+
+
+
+    elif current == State.onEntryActive:
+
+        Timer(15.0, TimertoIdle).start()
+
+
+
+        current = State.onStayActive
+
+        
+
+    elif current == State.onStayActive:
+
+        output(Motor=4, Led=1)
+
+
+
+    sleep(0.1)
+
+    system('clear')
+
+  
