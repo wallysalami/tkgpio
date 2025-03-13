@@ -28,7 +28,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.5"
-gpiozero = "*"
+gpiozero = "~1.6.2"
 Pillow = "*"
 numpy = {version = "*", optional = true}
 sounddevice = {version = "*", optional = true}
